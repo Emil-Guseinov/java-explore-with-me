@@ -7,7 +7,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://stats-db:5432/stats
       SPRING_DATASOURCE_USERNAME: stats
       SPRING_DATASOURCE_PASSWORD: stats
-      TZ: Europe/Moscow
+      TZ: UTC
     healthcheck:
       test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:9090/actuator/health"]
       interval: 5s
