@@ -43,7 +43,7 @@ services:
       SPRING_DATASOURCE_USERNAME: ewm
       SPRING_DATASOURCE_PASSWORD: ewm
       STATS_SERVER_URL: http://stats-server:9090
-      TZ: Europe/Moscow
+      TZ: UTC
     healthcheck:
       test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:8080/actuator/health"]
       interval: 5s
