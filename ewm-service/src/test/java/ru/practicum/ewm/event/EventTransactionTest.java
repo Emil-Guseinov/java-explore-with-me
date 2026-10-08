@@ -4,6 +4,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -15,11 +16,16 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.client.ResourceAccessException;
-import ru.practicum.ewm.category.Category;
-import ru.practicum.ewm.category.CategoryRepository;
-import ru.practicum.ewm.stats.EventStatisticsService;
-import ru.practicum.ewm.user.User;
-import ru.practicum.ewm.user.UserRepository;
+
+import ru.practicum.ewm.category.model.Category;
+import ru.practicum.ewm.category.repository.CategoryRepository;
+import ru.practicum.ewm.event.model.Event;
+import ru.practicum.ewm.event.model.EventState;
+import ru.practicum.ewm.event.model.Location;
+import ru.practicum.ewm.event.repository.EventRepository;
+import ru.practicum.ewm.stats.service.EventStatisticsService;
+import ru.practicum.ewm.user.model.User;
+import ru.practicum.ewm.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -211,6 +217,31 @@ class EventTransactionTest {
         assertThat(unchanged.getParticipantLimit()).isZero();
         assertThat(unchanged.getState()).isEqualTo(EventState.PENDING);
         assertThat(unchanged.getPublishedOn()).isNull();
+    }
+
+    @Test
+    void defaultSearchParametersPreservePaginationAndPublishedOnlyFilter() throws Exception {
+        Event event = saveEvent(EventState.PUBLISHED);
+        saveEvent(EventState.PENDING);
+
+        mockMvc.perform(get("/admin/events"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2));
+        mockMvc.perform(get("/events"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].id").value(event.getId()));
+    }
+
+    @ParameterizedTest
+    @CsvSource({"/admin/events,from,-1", "/admin/events,size,0", "/admin/events,states,UNKNOWN",
+            "/admin/events,rangeStart,not-a-date", "/events,from,-1", "/events,size,0",
+            "/events,sort,UNKNOWN", "/events,rangeEnd,not-a-date"})
+    void searchDtoRejectsInvalidQueryParametersBeforeStatistics(String path, String name, String value)
+            throws Exception {
+        mockMvc.perform(get(path).param(name, value)).andExpect(status().isBadRequest());
+
+        verifyNoInteractions(statistics);
     }
 
     @Test

@@ -2,6 +2,7 @@ package ru.practicum.ewm.compilation;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,15 +18,19 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.client.ResourceAccessException;
+
+import ru.practicum.ewm.category.model.Category;
+import ru.practicum.ewm.category.repository.CategoryRepository;
 import ru.practicum.ewm.compilation.dto.UpdateCompilationRequest;
-import ru.practicum.ewm.category.Category;
-import ru.practicum.ewm.category.CategoryRepository;
-import ru.practicum.ewm.event.Event;
-import ru.practicum.ewm.event.EventRepository;
-import ru.practicum.ewm.event.EventState;
-import ru.practicum.ewm.event.Location;
-import ru.practicum.ewm.user.User;
-import ru.practicum.ewm.user.UserRepository;
+import ru.practicum.ewm.compilation.model.Compilation;
+import ru.practicum.ewm.compilation.repository.CompilationRepository;
+import ru.practicum.ewm.compilation.service.CompilationStorageService;
+import ru.practicum.ewm.event.model.Event;
+import ru.practicum.ewm.event.model.EventState;
+import ru.practicum.ewm.event.model.Location;
+import ru.practicum.ewm.event.repository.EventRepository;
+import ru.practicum.ewm.user.model.User;
+import ru.practicum.ewm.user.repository.UserRepository;
 import ru.practicum.stats.client.StatsClient;
 import ru.practicum.stats.dto.ViewStats;
 

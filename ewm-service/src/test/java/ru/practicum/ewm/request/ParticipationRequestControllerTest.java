@@ -7,8 +7,12 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import ru.practicum.ewm.common.ErrorHandler;
+
+import ru.practicum.ewm.common.exception.ErrorHandler;
+import ru.practicum.ewm.request.controller.ParticipationRequestController;
 import ru.practicum.ewm.request.dto.ParticipationRequestDto;
+import ru.practicum.ewm.request.model.RequestStatus;
+import ru.practicum.ewm.request.service.ParticipationRequestService;
 
 import java.time.Clock;
 import java.time.LocalDateTime;

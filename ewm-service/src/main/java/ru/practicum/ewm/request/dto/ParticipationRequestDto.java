@@ -1,7 +1,8 @@
 package ru.practicum.ewm.request.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import ru.practicum.ewm.request.RequestStatus;
+
+import ru.practicum.ewm.request.model.RequestStatus;
 
 import java.time.LocalDateTime;
 

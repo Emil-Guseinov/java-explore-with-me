@@ -5,14 +5,20 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Sort;
-import ru.practicum.ewm.category.Category;
-import ru.practicum.ewm.category.CategoryRepository;
-import ru.practicum.ewm.common.OffsetPageRequest;
-import ru.practicum.ewm.request.ParticipationRequest;
-import ru.practicum.ewm.request.ParticipationRequestRepository;
-import ru.practicum.ewm.request.RequestStatus;
-import ru.practicum.ewm.user.User;
-import ru.practicum.ewm.user.UserRepository;
+
+import ru.practicum.ewm.category.model.Category;
+import ru.practicum.ewm.category.repository.CategoryRepository;
+import ru.practicum.ewm.common.pagination.OffsetPageRequest;
+import ru.practicum.ewm.event.model.Event;
+import ru.practicum.ewm.event.model.EventState;
+import ru.practicum.ewm.event.model.Location;
+import ru.practicum.ewm.event.repository.EventRepository;
+import ru.practicum.ewm.event.repository.EventSpecifications;
+import ru.practicum.ewm.request.model.ParticipationRequest;
+import ru.practicum.ewm.request.model.RequestStatus;
+import ru.practicum.ewm.request.repository.ParticipationRequestRepository;
+import ru.practicum.ewm.user.model.User;
+import ru.practicum.ewm.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;

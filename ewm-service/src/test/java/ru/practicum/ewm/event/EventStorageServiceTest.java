@@ -5,16 +5,22 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.practicum.ewm.category.Category;
-import ru.practicum.ewm.category.CategoryRepository;
-import ru.practicum.ewm.common.BadRequestException;
-import ru.practicum.ewm.common.ConflictException;
-import ru.practicum.ewm.common.NotFoundException;
+
+import ru.practicum.ewm.category.model.Category;
+import ru.practicum.ewm.category.repository.CategoryRepository;
+import ru.practicum.ewm.common.exception.BadRequestException;
+import ru.practicum.ewm.common.exception.ConflictException;
+import ru.practicum.ewm.common.exception.NotFoundException;
 import ru.practicum.ewm.event.dto.*;
-import ru.practicum.ewm.request.ParticipationRequestRepository;
-import ru.practicum.ewm.request.RequestStatus;
-import ru.practicum.ewm.user.User;
-import ru.practicum.ewm.user.UserRepository;
+import ru.practicum.ewm.event.model.Event;
+import ru.practicum.ewm.event.model.EventState;
+import ru.practicum.ewm.event.model.Location;
+import ru.practicum.ewm.event.repository.EventRepository;
+import ru.practicum.ewm.event.service.EventStorageService;
+import ru.practicum.ewm.request.model.RequestStatus;
+import ru.practicum.ewm.request.repository.ParticipationRequestRepository;
+import ru.practicum.ewm.user.model.User;
+import ru.practicum.ewm.user.repository.UserRepository;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -45,6 +51,15 @@ class EventStorageServiceTest {
     void setUp() {
         service = new EventStorageService(events, users, categories, requests, CLOCK);
         event = event(1L);
+    }
+
+    @Test
+    void invalidBatchSizeIsRejectedBeforeRepositoryAccess() {
+        assertThatThrownBy(() -> service.candidateIds(null, 0, 0))
+                .isInstanceOf(BadRequestException.class);
+        assertThatThrownBy(() -> service.candidateIds(null, 0, -1))
+                .isInstanceOf(BadRequestException.class);
+        verifyNoInteractions(events);
     }
 
     @Test

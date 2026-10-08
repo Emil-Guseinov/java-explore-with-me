@@ -1,6 +1,7 @@
 package ru.practicum.ewm.event;
 
 import jakarta.persistence.EntityManager;
+
 import org.hibernate.SessionFactory;
 import org.hibernate.stat.Statistics;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,14 +9,22 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Sort;
-import ru.practicum.ewm.category.Category;
-import ru.practicum.ewm.category.CategoryRepository;
-import ru.practicum.ewm.common.OffsetPageRequest;
-import ru.practicum.ewm.request.ParticipationRequest;
-import ru.practicum.ewm.request.ParticipationRequestRepository;
-import ru.practicum.ewm.request.RequestStatus;
-import ru.practicum.ewm.user.User;
-import ru.practicum.ewm.user.UserRepository;
+
+import ru.practicum.ewm.category.model.Category;
+import ru.practicum.ewm.category.repository.CategoryRepository;
+import ru.practicum.ewm.common.pagination.OffsetPageRequest;
+import ru.practicum.ewm.compilation.model.Compilation;
+import ru.practicum.ewm.compilation.repository.CompilationRepository;
+import ru.practicum.ewm.event.model.Event;
+import ru.practicum.ewm.event.model.EventState;
+import ru.practicum.ewm.event.model.Location;
+import ru.practicum.ewm.event.repository.EventRepository;
+import ru.practicum.ewm.event.repository.EventSpecifications;
+import ru.practicum.ewm.request.model.ParticipationRequest;
+import ru.practicum.ewm.request.model.RequestStatus;
+import ru.practicum.ewm.request.repository.ParticipationRequestRepository;
+import ru.practicum.ewm.user.model.User;
+import ru.practicum.ewm.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,6 +41,8 @@ class EventRepositoryLoadTest {
     private static final LocalDateTime NOW = LocalDateTime.of(2026, 10, 8, 12, 0);
     @Autowired
     private EventRepository events;
+    @Autowired
+    private CompilationRepository compilations;
     @Autowired
     private CategoryRepository categories;
     @Autowired
@@ -74,6 +85,48 @@ class EventRepositoryLoadTest {
         assertThat(secondBatch).containsExactly(third.getId());
         assertThat(emptyBatch).isEmpty();
         assertThat(statistics.getPrepareStatementCount()).isEqualTo(3);
+        assertThat(statistics.getEntityLoadCount()).isZero();
+    }
+
+    @Test
+    void publicationDatesAreReadWithoutLoadingEntitiesOrUnpublishedEvents() {
+        Event first = event(NOW.plusDays(1), EventState.PUBLISHED);
+        first.setPublishedOn(NOW.minusHours(3));
+        Event second = event(NOW.plusDays(2), EventState.PUBLISHED);
+        second.setPublishedOn(NOW.minusHours(1));
+        Event pending = event(NOW.plusDays(1), EventState.PENDING);
+        resetPersistenceContext();
+
+        var publications = events.findByIdInAndPublishedOnIsNotNull(
+                List.of(first.getId(), second.getId(), pending.getId()));
+
+        assertThat(publications).hasSize(2);
+        assertThat(publications).extracting(item -> item.getPublishedOn())
+                .containsExactlyInAnyOrder(NOW.minusHours(3), NOW.minusHours(1));
+        assertThat(statistics.getPrepareStatementCount()).isEqualTo(1);
+        assertThat(statistics.getEntityLoadCount()).isZero();
+    }
+
+    @Test
+    void compilationIdPagesDoNotLoadEntitiesOrCountTotal() {
+        Compilation first = new Compilation();
+        first.setTitle("First compilation");
+        first.setPinned(false);
+        compilations.save(first);
+        Compilation second = new Compilation();
+        second.setTitle("Second compilation");
+        second.setPinned(true);
+        compilations.save(second);
+        resetPersistenceContext();
+
+        var all = compilations.findAllBy(new OffsetPageRequest(1, 1, Sort.by("id")));
+        var pinned = compilations.findAllByPinned(true, new OffsetPageRequest(0, 1, Sort.by("id")));
+
+        assertThat(all).hasSize(1);
+        assertThat(all.getFirst().getId()).isEqualTo(second.getId());
+        assertThat(pinned).hasSize(1);
+        assertThat(pinned.getFirst().getId()).isEqualTo(second.getId());
+        assertThat(statistics.getPrepareStatementCount()).isEqualTo(2);
         assertThat(statistics.getEntityLoadCount()).isZero();
     }
 
