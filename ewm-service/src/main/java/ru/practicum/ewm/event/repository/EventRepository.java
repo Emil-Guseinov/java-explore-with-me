@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 
 import ru.practicum.ewm.event.model.Event;
+import ru.practicum.ewm.event.model.EventState;
 
 import java.util.Collection;
 import java.util.List;
@@ -45,4 +46,6 @@ public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecific
     List<EventPublication> findByIdInAndPublishedOnIsNotNull(Collection<Long> ids);
 
     boolean existsByCategoryId(Long categoryId);
+
+    boolean existsByIdAndState(Long id, EventState state);
 }

@@ -1,0 +1,1716 @@
+{
+  "info": {
+    "name": "ExploreWithMe — комментарии к событиям",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Создать организатора",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/admin/users",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\": \"Организатор\", \"email\": \"organizer-{{suffix}}@example.org\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set(\"suffix\", pm.variables.replaceIn(\"{{$guid}}\"));",
+              "pm.collectionVariables.set(\"futureDate\", new Date(Date.now() + 172800000).toISOString().slice(0, 19).replace(\"T\", \" \"));",
+              "pm.collectionVariables.set(\"missingId\", \"9223372036854775807\");",
+              "pm.collectionVariables.set(\"longText\", \"а\".repeat(2001));",
+              "pm.collectionVariables.set(\"maxText\", \"а\".repeat(2000));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 201\", () => pm.response.to.have.status(201));",
+              "if (pm.response.code === 201) pm.collectionVariables.set(\"organizerId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Создать автора комментариев",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/admin/users",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\": \"Автор\", \"email\": \"author-{{suffix}}@example.org\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 201\", () => pm.response.to.have.status(201));",
+              "if (pm.response.code === 201) pm.collectionVariables.set(\"authorId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Создать другого пользователя",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/admin/users",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\": \"Читатель\", \"email\": \"reader-{{suffix}}@example.org\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 201\", () => pm.response.to.have.status(201));",
+              "if (pm.response.code === 201) pm.collectionVariables.set(\"otherUserId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Создать категорию",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/admin/categories",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\": \"Comments {{suffix}}\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 201\", () => pm.response.to.have.status(201));",
+              "if (pm.response.code === 201) pm.collectionVariables.set(\"categoryId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Создать событие",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/users/{{organizerId}}/events",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"annotation\": \"Вечерняя прогулка по городскому парку\", \"category\": \"{{categoryId}}\", \"description\": \"Прогулка с гидом по самым интересным местам городского парка.\", \"eventDate\": \"{{futureDate}}\", \"location\": {\"lat\": 55.75, \"lon\": 37.62}, \"paid\": false, \"participantLimit\": 0, \"requestModeration\": false, \"title\": \"Прогулка {{suffix}}\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 201\", () => pm.response.to.have.status(201));",
+              "if (pm.response.code === 201) pm.collectionVariables.set(\"eventId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Нельзя комментировать неопубликованное событие",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/users/{{authorId}}/events/{{eventId}}/comments",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"text\": \"Вопрос\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 409\", () => pm.response.to.have.status(409));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Комментарии неопубликованного события скрыты",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/events/{{eventId}}/comments"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 404\", () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Опубликовать событие",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/admin/events/{{eventId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"stateAction\": \"PUBLISH_EVENT\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Новое событие не содержит комментариев",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/events/{{eventId}}/comments"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Пустой список\", () => { pm.expect(pm.response.json()).to.eql([]); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Создать другое событие",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/users/{{organizerId}}/events",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"annotation\": \"Вечерняя прогулка по городскому парку\", \"category\": \"{{categoryId}}\", \"description\": \"Прогулка с гидом по самым интересным местам городского парка.\", \"eventDate\": \"{{futureDate}}\", \"location\": {\"lat\": 55.75, \"lon\": 37.62}, \"paid\": false, \"participantLimit\": 0, \"requestModeration\": false, \"title\": \"Прогулка {{suffix}}\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 201\", () => pm.response.to.have.status(201));",
+              "if (pm.response.code === 201) pm.collectionVariables.set(\"otherEventId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Опубликовать другое событие",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/admin/events/{{otherEventId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"stateAction\": \"PUBLISH_EVENT\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Создать отменённое событие",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/users/{{organizerId}}/events",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"annotation\": \"Вечерняя прогулка по городскому парку\", \"category\": \"{{categoryId}}\", \"description\": \"Прогулка с гидом по самым интересным местам городского парка.\", \"eventDate\": \"{{futureDate}}\", \"location\": {\"lat\": 55.75, \"lon\": 37.62}, \"paid\": false, \"participantLimit\": 0, \"requestModeration\": false, \"title\": \"Прогулка {{suffix}}\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 201\", () => pm.response.to.have.status(201));",
+              "if (pm.response.code === 201) pm.collectionVariables.set(\"canceledEventId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Отменить событие",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/users/{{organizerId}}/events/{{canceledEventId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"stateAction\": \"CANCEL_REVIEW\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Нельзя комментировать отменённое событие",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/users/{{authorId}}/events/{{canceledEventId}}/comments",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"text\": \"Вопрос\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 409\", () => pm.response.to.have.status(409));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Комментарии отменённого события скрыты",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/events/{{canceledEventId}}/comments"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 404\", () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Создать первый комментарий",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/users/{{authorId}}/events/{{eventId}}/comments",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"text\": \"Где встречаемся?\", \"author\": {\"id\": \"{{otherUserId}}\"}, \"event\": \"{{otherEventId}}\", \"created\": \"2000-01-01 00:00:00\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 201\", () => pm.response.to.have.status(201));",
+              "if (pm.response.code === 201) pm.collectionVariables.set(\"firstCommentId\", pm.response.json().id);",
+              "pm.test(\"Автор и событие берутся из пути\", () => { const c = pm.response.json(); pm.expect(c.author.id).to.eql(Number(pm.collectionVariables.get(\"authorId\"))); pm.expect(c.event).to.eql(Number(pm.collectionVariables.get(\"eventId\"))); pm.expect(c.author).not.to.have.property(\"email\"); });",
+              "pm.test(\"Текст и время создания\", () => { const c = pm.response.json(); pm.expect(c.text).to.eql(\"Где встречаемся?\"); pm.expect(c.created).to.match(/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/); pm.expect(c.created).not.to.eql(\"2000-01-01 00:00:00\"); pm.expect(c.updated).to.eql(null); });",
+              "pm.collectionVariables.set(\"firstCreated\", pm.response.json().created);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Создать второй комментарий",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/users/{{authorId}}/events/{{eventId}}/comments",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"text\": \"Можно с детьми?\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 201\", () => pm.response.to.have.status(201));",
+              "if (pm.response.code === 201) pm.collectionVariables.set(\"secondCommentId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Организатор тоже может комментировать",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/users/{{organizerId}}/events/{{eventId}}/comments",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"text\": \"Сбор у главного входа\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 201\", () => pm.response.to.have.status(201));",
+              "if (pm.response.code === 201) pm.collectionVariables.set(\"thirdCommentId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Комментарий другого события",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/users/{{authorId}}/events/{{otherEventId}}/comments",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"text\": \"Другой маршрут\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 201\", () => pm.response.to.have.status(201));",
+              "if (pm.response.code === 201) pm.collectionVariables.set(\"otherCommentId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Публичный список: порядок и изоляция событий",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/events/{{eventId}}/comments"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Три комментария от новых к старым\", () => { pm.expect(pm.response.json().map(c => c.id)).to.eql([\"thirdCommentId\", \"secondCommentId\", \"firstCommentId\"].map(key => Number(pm.collectionVariables.get(key)))); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Пагинация с неполным смещением",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/events/{{eventId}}/comments?from=1&size=2"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Пропускается ровно одна запись\", () => { pm.expect(pm.response.json().map(c => c.id)).to.eql([\"secondCommentId\", \"firstCommentId\"].map(key => Number(pm.collectionVariables.get(key)))); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Смещение за концом списка",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/events/{{eventId}}/comments?from=100&size=2"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Пустой список\", () => { pm.expect(pm.response.json()).to.eql([]); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Чужой пользователь не может редактировать",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/users/{{otherUserId}}/comments/{{firstCommentId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"text\": \"Подмена\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 404\", () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Чужой пользователь не может удалить",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/users/{{otherUserId}}/comments/{{firstCommentId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 404\", () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "После чужих запросов комментарий сохранён",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/events/{{eventId}}/comments"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Исходный текст не изменился\", () => { const c = pm.response.json().find(c => c.id === Number(pm.collectionVariables.get(\"firstCommentId\"))); pm.expect(c.text).to.eql(\"Где встречаемся?\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Автор изменяет свой комментарий",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/users/{{authorId}}/comments/{{firstCommentId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"text\": \"Во сколько встречаемся?\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Изменён только текст, выставлено время изменения\", () => { const c = pm.response.json(); pm.expect(c.text).to.eql(\"Во сколько встречаемся?\"); pm.expect(c.created).to.eql(pm.collectionVariables.get(\"firstCreated\")); pm.expect(c.updated).to.match(/^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$/); pm.expect(c.author.id).to.eql(Number(pm.collectionVariables.get(\"authorId\"))); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Создание: нет текста",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/users/{{authorId}}/events/{{eventId}}/comments",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Изменение: нет текста",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/users/{{authorId}}/comments/{{firstCommentId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Создание: null",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/users/{{authorId}}/events/{{eventId}}/comments",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"text\": null}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Изменение: null",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/users/{{authorId}}/comments/{{firstCommentId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"text\": null}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Создание: пустой текст",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/users/{{authorId}}/events/{{eventId}}/comments",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"text\": \"\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Изменение: пустой текст",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/users/{{authorId}}/comments/{{firstCommentId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"text\": \"\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Создание: пробелы",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/users/{{authorId}}/events/{{eventId}}/comments",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"text\": \" \\t\\n \"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Изменение: пробелы",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/users/{{authorId}}/comments/{{firstCommentId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"text\": \" \\t\\n \"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Создание: превышение длины",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/users/{{authorId}}/events/{{eventId}}/comments",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"text\": \"{{longText}}\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Изменение: превышение длины",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/users/{{authorId}}/comments/{{firstCommentId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"text\": \"{{longText}}\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ошибочные изменения не затронули сохранённый текст",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/events/{{eventId}}/comments"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Список и изменённый текст сохранены\", () => { const all = pm.response.json(); pm.expect(all).to.have.lengthOf(3); pm.expect(all.find(c => c.id === Number(pm.collectionVariables.get(\"firstCommentId\"))).text).to.eql(\"Во сколько встречаемся?\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Допустим текст длиной 2000 символов",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/users/{{authorId}}/events/{{eventId}}/comments",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"text\": \"{{maxText}}\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 201\", () => pm.response.to.have.status(201));",
+              "if (pm.response.code === 201) pm.collectionVariables.set(\"maxCommentId\", pm.response.json().id);",
+              "pm.test(\"Текст сохранён целиком\", () => { pm.expect(pm.response.json().text).to.have.lengthOf(2000); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Удалить граничный пример",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/users/{{authorId}}/comments/{{maxCommentId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 204\", () => pm.response.to.have.status(204));",
+              "pm.test(\"Тело отсутствует\", () => { pm.expect(pm.response.text()).to.eql(\"\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Неверная пагинация: from=-1",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/events/{{eventId}}/comments?from=-1"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Неверная пагинация: size=0",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/events/{{eventId}}/comments?size=0"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Неверная пагинация: size=-1",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/events/{{eventId}}/comments?size=-1"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Неверная пагинация: size=abc",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/events/{{eventId}}/comments?size=abc"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Некорректный идентификатор события",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/events/0/comments"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Некорректный идентификатор комментария",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/admin/comments/0"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Нет события для публичного списка",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/events/{{missingId}}/comments"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 404\", () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Нет события для создания",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/users/{{authorId}}/events/{{missingId}}/comments",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"text\": \"Текст\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 404\", () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Нет пользователя для создания",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/users/{{missingId}}/events/{{eventId}}/comments",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"text\": \"Текст\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 404\", () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Нет комментария для изменения",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/users/{{authorId}}/comments/{{missingId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"text\": \"Текст\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 404\", () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Нет комментария для удаления автором",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/users/{{authorId}}/comments/{{missingId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 404\", () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Нет комментария для удаления администратором",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/admin/comments/{{missingId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 404\", () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Автор удаляет первый комментарий",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/users/{{authorId}}/comments/{{firstCommentId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 204\", () => pm.response.to.have.status(204));",
+              "pm.test(\"Тело отсутствует\", () => { pm.expect(pm.response.text()).to.eql(\"\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Повторное удаление возвращает 404",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/users/{{authorId}}/comments/{{firstCommentId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 404\", () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Администратор удаляет второй комментарий",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/admin/comments/{{secondCommentId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 204\", () => pm.response.to.have.status(204));",
+              "pm.test(\"Тело отсутствует\", () => { pm.expect(pm.response.text()).to.eql(\"\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "После удаления остаётся только комментарий организатора",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/events/{{eventId}}/comments"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Сохранился нужный комментарий\", () => { pm.expect(pm.response.json().map(c => c.id)).to.eql([Number(pm.collectionVariables.get(\"thirdCommentId\"))]); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Удалить автора комментариев",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/admin/users/{{authorId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 204\", () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Удаление автора удаляет его комментарии",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/events/{{otherEventId}}/comments"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Пустой список\", () => { pm.expect(pm.response.json()).to.eql([]); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Комментарий читателя перед удалением события",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/users/{{otherUserId}}/events/{{eventId}}/comments",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"text\": \"Жду встречи\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 201\", () => pm.response.to.have.status(201));",
+              "if (pm.response.code === 201) pm.collectionVariables.set(\"cascadeCommentId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Удалить организатора вместе с событиями",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/admin/users/{{organizerId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 204\", () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Комментарий удалённого события тоже удалён",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/admin/comments/{{cascadeCommentId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 404\", () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Удалённое событие недоступно",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/events/{{eventId}}/comments"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 404\", () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Очистить другого пользователя",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/admin/users/{{otherUserId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 204\", () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Очистить категорию",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/admin/categories/{{categoryId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Код ответа 204\", () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
