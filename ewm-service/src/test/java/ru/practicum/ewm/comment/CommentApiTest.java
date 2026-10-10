@@ -86,6 +86,34 @@ class CommentApiTest {
     }
 
     @Test
+    void trimsTextOnCreationAndUpdate() throws Exception {
+        String response = mvc.perform(post("/users/{userId}/events/{eventId}/comments",
+                        author.getId(), event.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body(" \tПервый  комментарий\n ")))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.text").value("Первый  комментарий"))
+                .andReturn().getResponse().getContentAsString();
+
+        long id = mapper.readTree(response).get("id").asLong();
+        entityManager.flush();
+        entityManager.clear();
+        assertThat(comments.findById(id).orElseThrow().getText())
+                .isEqualTo("Первый  комментарий");
+
+        mvc.perform(patch("/users/{userId}/comments/{commentId}", author.getId(), id)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body(" \nОбновлённый  комментарий\t ")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.text").value("Обновлённый  комментарий"));
+
+        entityManager.flush();
+        entityManager.clear();
+        assertThat(comments.findById(id).orElseThrow().getText())
+                .isEqualTo("Обновлённый  комментарий");
+    }
+
+    @Test
     void createsCommentWithServerOwnedFields() throws Exception {
         String body = "{\"text\":\"Где находится вход?\",\"id\":999999,\"event\":999999,"
                 + "\"author\":{\"id\":999999},\"created\":\"2000-01-01 00:00:00\","

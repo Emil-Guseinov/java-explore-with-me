@@ -43,7 +43,7 @@ public class CommentService {
             throw new ConflictException("Only published events accept comments");
         }
         Comment comment = new Comment();
-        comment.setText(request.text());
+        comment.setText(request.text().trim());
         comment.setAuthor(author);
         comment.setEvent(event);
         comment.setCreated(LocalDateTime.now(clock));
@@ -53,7 +53,7 @@ public class CommentService {
     @Transactional
     public CommentDto update(long userId, long commentId, CommentRequest request) {
         Comment comment = ownedComment(userId, commentId);
-        comment.setText(request.text());
+        comment.setText(request.text().trim());
         comment.setUpdated(LocalDateTime.now(clock));
         return CommentMapper.toDto(comment);
     }
@@ -86,7 +86,7 @@ public class CommentService {
     }
 
     private Comment lockedComment(long commentId) {
-        return comments.findLockedById(commentId)
+        return comments.findByIdForUpdate(commentId)
                 .orElseThrow(() -> new NotFoundException("Comment not found: " + commentId));
     }
 }
